@@ -1,0 +1,14 @@
+.env
+.env*.local
+.env.production
+.next
+node_modules
+.vercel
+.DS_Store
+dist
+coverage
+output
+.playwright-cli
+*.tsbuildinfo
+
+*.log

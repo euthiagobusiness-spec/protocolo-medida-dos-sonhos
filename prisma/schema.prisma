@@ -1,0 +1,39 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum LeadStatus {
+  NEW
+  COMMUNITY_ACCESSED
+  CONTACTED
+  CONVERTED
+  LOST
+}
+
+model Lead {
+  id                  String     @id @default(cuid())
+  fullName            String
+  phone               String
+  instagram           String
+  source              String?
+  utmSource           String?
+  utmMedium           String?
+  utmCampaign         String?
+  status              LeadStatus @default(NEW)
+  consentPrivacy      Boolean
+  consentMarketing    Boolean    @default(false)
+  consentVersion      String
+  consentAt           DateTime
+  accessTokenHash     String     @unique
+  createdAt           DateTime   @default(now())
+  updatedAt           DateTime   @updatedAt
+
+  @@index([createdAt])
+  @@index([status])
+  @@map("leads")
+}
