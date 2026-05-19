@@ -6,6 +6,8 @@ export function InteractiveBackdrop() {
   useEffect(() => {
     const root = document.documentElement;
     let frame = 0;
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const coarsePointer = window.matchMedia("(hover: none), (pointer: coarse)").matches;
 
     function updatePointer(event: PointerEvent) {
       if (frame) {
@@ -43,23 +45,29 @@ export function InteractiveBackdrop() {
       const progress = window.scrollY / max;
 
       root.style.setProperty("--scroll-progress", progress.toFixed(4));
-      root.style.setProperty("--scroll-shift", `${(progress * 100).toFixed(2)}px`);
-      root.style.setProperty("--scroll-up-soft", `${(-progress * 28).toFixed(2)}px`);
-      root.style.setProperty("--scroll-up-mid", `${(-progress * 52).toFixed(2)}px`);
-      root.style.setProperty("--scroll-down-soft", `${(progress * 34).toFixed(2)}px`);
-      root.style.setProperty("--scroll-card", `${(-progress * 18).toFixed(2)}px`);
-      root.style.setProperty("--scroll-section", `${(-progress * 30).toFixed(2)}px`);
+      root.style.setProperty("--scroll-shift", `${(progress * (coarsePointer ? 22 : 100)).toFixed(2)}px`);
+      root.style.setProperty("--scroll-up-soft", `${(-progress * (coarsePointer ? 8 : 28)).toFixed(2)}px`);
+      root.style.setProperty("--scroll-up-mid", `${(-progress * (coarsePointer ? 12 : 52)).toFixed(2)}px`);
+      root.style.setProperty("--scroll-down-soft", `${(progress * (coarsePointer ? 8 : 34)).toFixed(2)}px`);
+      root.style.setProperty("--scroll-card", `${(-progress * (coarsePointer ? 0 : 18)).toFixed(2)}px`);
+      root.style.setProperty("--scroll-section", `${(-progress * (coarsePointer ? 0 : 30)).toFixed(2)}px`);
     }
 
     updateScroll();
-    window.addEventListener("pointermove", updatePointer, { passive: true });
+
+    if (!reducedMotion && !coarsePointer) {
+      window.addEventListener("pointermove", updatePointer, { passive: true });
+    }
+
     window.addEventListener("scroll", updateScroll, { passive: true });
 
     return () => {
       if (frame) {
         cancelAnimationFrame(frame);
       }
-      window.removeEventListener("pointermove", updatePointer);
+      if (!reducedMotion && !coarsePointer) {
+        window.removeEventListener("pointermove", updatePointer);
+      }
       window.removeEventListener("scroll", updateScroll);
     };
   }, []);
